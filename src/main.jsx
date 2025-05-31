@@ -11,6 +11,9 @@ import Dashboard from "./routes/Dashboard";
 import SignUpFreelancer from "./routes/SignUpFreeLancer";
 import SignUpSelection from "./routes/SignUpSelection";
 import SignUpEmployer from "./routes/SignUpEmployer";
+import Profile from "./routes/Profile";
+import Create from "./routes/Create";
+import Earnings from "./routes/Earnings";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +39,18 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <Dashboard/>,
+  },
+  {
+    path: "/profile",
+    element: <Profile/>,
+  },
+  {
+    path: "/earnings",
+    element: <Earnings/>,
+  },
+  {
+    path: "/create",
+    element: <Create/>,
   },
 ]);
 
