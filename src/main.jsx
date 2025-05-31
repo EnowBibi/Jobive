@@ -6,11 +6,36 @@ import './index.css';
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import Login from "./routes/Login";
+import Dashboard from "./routes/Dashboard";
+import SignUpFreelancer from "./routes/SignUpFreeLancer";
+import SignUpSelection from "./routes/SignUpSelection";
+import SignUpEmployer from "./routes/SignUpEmployer";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>,
+    element: <SignUpSelection/>,
+  },
+  {
+    path: "/signupselection",
+    element: <SignUpSelection/>,
+  },
+  {
+    path: "/signupfreelancer",
+    element: <SignUpFreelancer/>,
+  },
+  {
+    path: "/signupemployer",
+    element: <SignUpEmployer/>,
+  },
+  {
+    path: "/login",
+    element: <Login/>,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard/>,
   },
 ]);
 
