@@ -26,6 +26,7 @@ function Login() {
     setMessage({ text: "", type: "" })
 
     try {
+      console.log(formData)
       // Use our auth service instead of direct fetch
       const result = await authAPI.login(formData)
 

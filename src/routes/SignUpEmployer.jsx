@@ -53,7 +53,6 @@ function SignUpEmployer() {
       role: "employer",
       location: formData.location,
     })
-
     if (result.success) {
       // ✅ Save user to localStorage
               localStorage.setItem("user", JSON.stringify(result.data))
