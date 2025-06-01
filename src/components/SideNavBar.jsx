@@ -6,7 +6,7 @@ import { FiLogOut, FiMenu } from 'react-icons/fi'
 import { useLocation, useNavigate } from 'react-router'
 import axios from 'axios'
 import { BASE_URL } from '../config'
-
+import logo from '../assets/logo2.png'
 function SideNavBar() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -62,9 +62,8 @@ function SideNavBar() {
         } md:translate-x-0 md:static md:flex flex-col items-center`}
       >
         {/* Logo */}
-        <div className="w-72 h-20 mb-8 text-white text-3xl font-bold flex items-center justify-center">
-          LOGO
-        </div>
+        
+        <img src={logo} className="w-72 h-20 mb-8"/>
 
         {/* Menu */}
         {renderMenuItems()}
