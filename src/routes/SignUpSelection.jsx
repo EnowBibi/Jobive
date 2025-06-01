@@ -32,7 +32,7 @@ function SignUpSelection() {
         <div className="flex flex-col bg-white items-center p-10 gap-6 rounded-2xl shadow-xl animate-fade-in-up">
           {/* Freelancer Card */}
           <div
-            className="bg-main-500 flex flex-row items-center p-5 rounded-[8px] gap-4 cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
+            className="bg-main-500 flex flex-col md:flex-row items-center p-5 rounded-[8px] gap-4 cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
             onClick={() => navigate('/signupfreelancer')}
           >
             <img src={freelancer} className="w-[200px] h-[150px]" alt="Freelancer" />
@@ -41,7 +41,7 @@ function SignUpSelection() {
 
           {/* Employer Card */}
           <div
-            className="bg-main-500 flex flex-row items-center p-5 rounded-[8px] gap-4 cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
+            className="bg-main-500 flex flex-col md:flex-row items-center p-5 rounded-[8px] gap-4 cursor-pointer transform transition duration-300 hover:scale-105 hover:shadow-lg hover:brightness-110"
             onClick={() => navigate('/signupemployer')}
           >
             <img src={employer} className="w-[200px] h-[150px]" alt="Employer" />
