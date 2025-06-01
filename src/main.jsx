@@ -14,11 +14,21 @@ import SignUpEmployer from "./routes/SignUpEmployer";
 import Create from "./routes/Create";
 import Earnings from "./routes/Earnings";
 import Jobs from "./routes/Jobs";
+import MoreJobs from "./routes/MoreJobs";
+import Freelancers from "./routes/Freelancers";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <SignUpSelection/>,
+    element: <App/>,
+  },
+  {
+    path: "/morejobs",
+    element: <MoreJobs/>,
+  },
+  {
+    path: "/freelancers",
+    element: <Freelancers/>,
   },
   {
     path: "/signupselection",

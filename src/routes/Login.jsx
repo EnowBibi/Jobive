@@ -5,7 +5,7 @@ import { useNavigate, NavLink } from "react-router" // Fixed import
 import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { authAPI } from "../services/api"
 
-import logo from "../assets/logo.png"
+import logo from "../assets/logo.jpg"
 import group from "../assets/Group.png"
 
 function Login() {

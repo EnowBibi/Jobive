@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.jpg';
 import freelancer from '../assets/freelancer.png';
 import employer from '../assets/employer.png';
 import { NavLink, useNavigate } from 'react-router';
