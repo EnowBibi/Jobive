@@ -27,7 +27,7 @@ export default function JobCreation() {
   return (
     <div className="flex flex-col w-full min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-10">
       {/* Header */}
-      <div className="relative h-32 sm:h-40 lg:h-48 w-full bg-gradient-to-r from-green-400 to-green-600 rounded-lg mb-16 sm:mb-20">
+      <div className="relative h-32 sm:h-40 lg:h-48 w-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg mb-16 sm:mb-20">
         <div className="absolute bottom-[-40px] sm:bottom-[-48px] lg:bottom-[-64px] left-6 lg:left-10">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Create a New Job</h1>
           <p className="text-sm sm:text-base">Post a job and attract top talent</p>

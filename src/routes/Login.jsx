@@ -36,7 +36,13 @@ function Login() {
               localStorage.setItem("token", result.data.token);
             }
         setMessage({ text: "Login successful!", type: "success" })
-        navigate("/dashboard")
+        console.log(result.data.role)
+        if(result.data.role=="employer"){
+          navigate("/jobcreation")
+        }else{
+          navigate("/dashboard")
+
+        }
       } else {
         setMessage({ text: result.message || "Login failed.", type: "error" })
       }
