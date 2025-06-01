@@ -213,7 +213,7 @@ function Dashboard() {
           <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 lg:mb-8">
             <div className="ml-4 sm:ml-6 lg:ml-8">
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{user.name || "Charles Deo"}</h1>
-              <p className="text-gray-600">{user.skill || "UI/UX Designer"}</p>
+              <p className="text-gray-600">{user.skills || "UI/UX Designer"}</p>
             </div>
             <div className="ml-4 sm:ml-0">
               <button className="flex items-center gap-2 bg-blue-600 text-white px-4 lg:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
@@ -248,25 +248,18 @@ function Dashboard() {
                 <div className="bg-white rounded-lg p-4 lg:p-6 shadow-sm mb-6">
                   <h3 className="text-lg font-semibold mb-4">About</h3>
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <FaUser className="text-gray-600 text-lg" />
-                      <span className="text-gray-800">Male</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <FaCalendarAlt className="text-gray-600 text-lg" />
-                      <span className="text-gray-800">Born June 26, 1985</span>
-                    </div>
+                  
                     <div className="flex items-center gap-3">
                       <FaMapMarkerAlt className="text-gray-600 text-lg" />
-                      <span className="text-gray-800 break-words">2239 Hog Camp Road, Schaumburg</span>
+                      <span className="text-gray-800 break-words">{user.location}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <FaEnvelope className="text-gray-600 text-lg" />
-                      <span className="text-gray-800 break-words">charles432@hotmail.com</span>
+                      <span className="text-gray-800 break-words">{user.email}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <FaPhone className="text-gray-600 text-lg" />
-                      <span className="text-gray-800">3375795467</span>
+                      <span className="text-gray-800">{user.phone}</span>
                     </div>
                   </div>
                 </div>
