@@ -1,93 +1,89 @@
-import React, { useState } from 'react';
-import { BASE_URL } from '../config';
+"use client"
 
-import logo from '../assets/logo.png';
-import group from '../assets/Group.png';
-import { NavLink, useNavigate } from 'react-router'; // Fix import
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useState } from "react"
+import { NavLink, useNavigate } from "react-router" // Fixed import
+import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { authAPI } from "../services/api"
+
+import logo from "../assets/logo.png"
+import group from "../assets/Group.png"
 
 function SignUpFreelancer() {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    skills: '',
-    password: '',
-    location: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    skills: "",
+    password: "",
+    location: "",
     agreed: false,
-  });
+  })
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' }); // type: 'success' | 'error'
-  const navigate= useNavigate();
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState({ text: "", type: "" })
+  const navigate = useNavigate()
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
+      [name]: type === "checkbox" ? checked : value,
+    }))
+  }
 
   const handleSubmit = async () => {
     if (!formData.agreed) {
-      setMessage({ text: 'Please agree to the terms and conditions.', type: 'error' });
-      return;
+      setMessage({ text: "Please agree to the terms and conditions.", type: "error" })
+      return
     }
 
-    setLoading(true);
-    setMessage({ text: '', type: '' });
+    setLoading(true)
+    setMessage({ text: "", type: "" })
 
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email,
-          phone: formData.phone,
-          skills: formData.skills,
-          password: formData.password,
-          role: 'freelancer',
-          location: formData.location,
-        }),
-      });
+      // Use our auth service instead of direct fetch
+      const result = await authAPI.register({
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        skills: formData.skills,
+        password: formData.password,
+        role: "freelancer",
+        location: formData.location,
+      })
 
-      const result = await response.json();
+      if (result.success) {
+                localStorage.setItem("user", JSON.stringify(result.data))
+        setMessage({ text: "Signup successful!", type: "success" })
+        navigate("/dashboard")
 
-      if (response.ok) {
-        // Save user data in localStorage
-        localStorage.setItem('user', JSON.stringify(result.data));
-        setMessage({ text: 'Signup successful!', type: 'success' });
-        navigate('/dashboard')
-        // Optional: Reset form if you want
+        // Reset form if needed
         setFormData({
-          firstName: '',
-          lastName: '',
-          email: '',
-          phone: '',
-          skills: '',
-          password: '',
-          location: '',
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          skills: "",
+          password: "",
+          location: "",
           agreed: false,
-        });
+        })
       } else {
-        setMessage({ text: result.message || result.error || 'Signup failed.', type: 'error' });
+        setMessage({ text: result.message || result.error || "Signup failed.", type: "error" })
       }
     } catch (err) {
-      setMessage({ text: 'Something went wrong.', type: 'error' });
+      setMessage({ text: err.message || "Something went wrong.", type: "error" })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col w-screen h-screen">
       <div className="flex flex-row items-center px-6 md:px-16">
-        <img src={logo} className="w-[205px] h-[80px]" />
+        <img src={logo || "/placeholder.svg"} className="w-[205px] h-[80px]" />
         <select className="ml-auto mr-4 py-1 px-3 border border-gray-300 rounded-[8px] text-sm focus:outline-none focus:ring-2 focus:ring-black">
           <option value="en">English</option>
           <option value="fr">Français</option>
@@ -105,7 +101,7 @@ function SignUpFreelancer() {
           <span className="text-xl text-white mb-10 max-w-[400px]">
             Unlock thousands of freelance opportunities. Your next big project starts here.
           </span>
-          <img src={group} className="w-[300px] h-[300px]" />
+          <img src={group || "/placeholder.svg"} className="w-[300px] h-[300px]" />
         </div>
 
         <div className="flex-1 m-5 bg-white rounded-3xl py-6 px-8 md:px-16">
@@ -183,17 +179,13 @@ function SignUpFreelancer() {
             <div className="flex flex-1 flex-col gap-2.5 relative">
               <div className="flex flex-row ">
                 <span className="text-gray-500">Password</span>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="ml-auto text-gray-500"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="ml-auto text-gray-500">
                   {showPassword ? <FaEye /> : <FaEyeSlash />}
                 </button>
-                <span className="text-gray-500 mx-2">{showPassword ? 'Hide' : 'See'}</span>
+                <span className="text-gray-500 mx-2">{showPassword ? "Hide" : "See"}</span>
               </div>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -216,7 +208,7 @@ function SignUpFreelancer() {
             {message.text && (
               <div
                 className={`mt-4 text-center font-semibold ${
-                  message.type === 'success' ? 'text-green-600' : 'text-red-600'
+                  message.type === "success" ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {message.text}
@@ -228,7 +220,7 @@ function SignUpFreelancer() {
               onClick={handleSubmit}
               disabled={loading}
               className={`mt-4 flex justify-center items-center bg-black text-white font-bold py-2 px-4 rounded-[8px] hover:bg-gray-800 ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+                loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
               {loading ? (
@@ -238,29 +230,18 @@ function SignUpFreelancer() {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
               ) : (
-                'Sign Up'
+                "Sign Up"
               )}
             </button>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default SignUpFreelancer;
+export default SignUpFreelancer

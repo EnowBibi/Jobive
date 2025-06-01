@@ -1,56 +1,52 @@
-import React, { useState } from 'react';
-import { BASE_URL } from '../config';
-import group from '../assets/Group.png';
+"use client"
 
-import logo from '../assets/logo.png';
-import { useNavigate, NavLink } from 'react-router';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useState } from "react"
+import { useNavigate, NavLink } from "react-router" // Fixed import
+import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { authAPI } from "../services/api"
+
+import logo from "../assets/logo.png"
+import group from "../assets/Group.png"
 
 function Login() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" })
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState({ text: "", type: "" })
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSubmit = async () => {
-    setLoading(true);
-    setMessage({ text: '', type: '' });
+    setLoading(true)
+    setMessage({ text: "", type: "" })
 
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // important to send/receive cookies
-        body: JSON.stringify(formData),
-      });
+      // Use our auth service instead of direct fetch
+      const result = await authAPI.login(formData)
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        localStorage.setItem('user', JSON.stringify(result.data)); // store user info
-        setMessage({ text: 'Login successful!', type: 'success' });
-        navigate('/dashboard');
+      if (result.success) {
+        localStorage.setItem("user", JSON.stringify(result.data))
+        setMessage({ text: "Login successful!", type: "success" })
+        navigate("/dashboard")
       } else {
-        setMessage({ text: result.message || 'Login failed.', type: 'error' });
+        setMessage({ text: result.message || "Login failed.", type: "error" })
       }
     } catch (err) {
-      setMessage({ text: 'Something went wrong.', type: 'error' });
+      setMessage({ text: err.message || "Something went wrong.", type: "error" })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col w-screen h-screen">
       <div className="flex flex-row items-center px-6 md:px-16">
-        <img src={logo} alt="Logo" className="w-[205px] h-[80px]" />
+        <img src={logo || "/placeholder.svg"} alt="Logo" className="w-[205px] h-[80px]" />
         <select className="ml-auto mr-4 py-1 px-3 border border-gray-300 rounded-[8px] text-sm focus:outline-none focus:ring-2 focus:ring-black">
           <option value="en">English</option>
           <option value="fr">Français</option>
@@ -81,16 +77,12 @@ function Login() {
             <div className="flex flex-col gap-2 relative">
               <div className="flex items-center justify-between">
                 <label className="text-gray-500">Password</label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-gray-500"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="text-gray-500">
                   {showPassword ? <FaEye /> : <FaEyeSlash />}
                 </button>
               </div>
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
@@ -101,7 +93,7 @@ function Login() {
             {message.text && (
               <div
                 className={`mt-2 text-center font-semibold ${
-                  message.type === 'success' ? 'text-green-600' : 'text-red-600'
+                  message.type === "success" ? "text-green-600" : "text-red-600"
                 }`}
               >
                 {message.text}
@@ -112,7 +104,7 @@ function Login() {
               onClick={handleSubmit}
               disabled={loading}
               className={`mt-4 bg-black text-white font-bold py-2 px-4 rounded-[8px] hover:bg-gray-800 ${
-                loading ? 'opacity-70 cursor-not-allowed' : ''
+                loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
               {loading ? (
@@ -122,22 +114,11 @@ function Login() {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
               ) : (
-                'Login'
+                "Login"
               )}
             </button>
           </div>
@@ -147,11 +128,11 @@ function Login() {
           <span className="text-xl text-white mb-10 max-w-[400px]">
             Connect with skilled freelancers and grow your business faster.
           </span>
-          <img src={group} className="w-[300px] h-[300px]" />
+          <img src={group || "/placeholder.svg"} className="w-[300px] h-[300px]" />
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default Login;
+export default Login

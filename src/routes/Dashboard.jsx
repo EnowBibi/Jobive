@@ -15,23 +15,45 @@ import {
 } from "react-icons/fa"
 import SideNavBar from "../components/SideNavBar"
 import dummy from "../assets/dummy.png"
+import { postAPI } from "../services/api"
+import { handleApiError } from "../utils/notifications"
 
 function Dashboard() {
   const [user, setUser] = useState({})
   const [activeTab, setActiveTab] = useState("About")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [posts, setPosts] = useState([])
+  const [isLoadingPosts, setIsLoadingPosts] = useState(false)
+  const [postsError, setPostsError] = useState(null)
+  const [debugInfo, setDebugInfo] = useState({})
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user")
+    console.log("Stored user:", localStorage.getItem("user"));
+
+    const storedUser = localStorage.getItem("user");
+    console.log(storedUser)
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser)
         setUser(parsedUser || {})
+        console.log("🔍 Debug - User from localStorage:", parsedUser)
       } catch (error) {
         console.error("Error parsing user data from localStorage:", error)
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (activeTab === "Posts") {
+      console.log("🔍 Debug - Posts tab activated, user:", user)
+      if (user._id) {
+        fetchUserPosts()
+      } else {
+        console.log("🔍 Debug - No user._id found, trying to fetch all posts instead")
+        fetchAllPosts() // Fallback to fetch all posts
+      }
+    }
+  }, [activeTab]) // Removed user._id from dependency array
 
   const tabs = ["About", "Followers", "Following", "Posts"]
 
@@ -48,50 +70,136 @@ function Dashboard() {
     { name: "Adriene Watson", role: "Designer", avatar: dummy },
   ]
 
-  const posts = [
-    {
-      id: 1,
-      author: "Charles Deo",
-      content: "New Blazer out here... SOON!!!",
-      likes: 1345,
-      comments: 3000,
-      image: dummy,
-    },
-    {
-      id: 2,
-      author: "Charles Deo",
-      content: "Working on some new designs today!",
-      likes: 892,
-      comments: 156,
-      image: dummy,
-    },
-  ]
+  // Function to fetch user's posts
+  const fetchUserPosts = async () => {
+    console.log("🔍 Debug - fetchUserPosts called with user._id:", user._id)
+
+    if (!user._id) {
+      console.log("🔍 Debug - No user._id, cannot fetch user posts")
+      return
+    }
+
+    setIsLoadingPosts(true)
+    setPostsError(null)
+
+    try {
+      console.log("🔍 Debug - Making API call to getUserPosts...")
+      const response = await postAPI.getUserPosts(user._id)
+      console.log("🔍 Debug - getUserPosts response:", response)
+
+      if (response.success) {
+        setPosts(response.data)
+        setDebugInfo({
+          method: "getUserPosts",
+          userId: user._id,
+          postsCount: response.data.length,
+          response: response,
+        })
+        console.log("🔍 Debug - Posts set successfully:", response.data)
+      } else {
+        setPostsError("Failed to load posts")
+        console.log("🔍 Debug - API returned success: false")
+      }
+    } catch (error) {
+      console.error("🔍 Debug - Error fetching user posts:", error)
+      setPostsError("Failed to load posts")
+      setDebugInfo({
+        method: "getUserPosts",
+        userId: user._id,
+        error: error.message,
+        fullError: error,
+      })
+      handleApiError(error)
+    } finally {
+      setIsLoadingPosts(false)
+    }
+  }
+
+  // Fallback function to fetch all posts
+  const fetchAllPosts = async () => {
+    console.log("🔍 Debug - fetchAllPosts called as fallback")
+
+    setIsLoadingPosts(true)
+    setPostsError(null)
+
+    try {
+      console.log("🔍 Debug - Making API call to getAllPosts...")
+      const response = await postAPI.getAllPosts(1, 10)
+      console.log("🔍 Debug - getAllPosts response:", response)
+
+      if (response.success) {
+        setPosts(response.data)
+        setDebugInfo({
+          method: "getAllPosts",
+          postsCount: response.data.length,
+          response: response,
+        })
+        console.log("🔍 Debug - All posts set successfully:", response.data)
+      } else {
+        setPostsError("Failed to load posts")
+        console.log("🔍 Debug - API returned success: false")
+      }
+    } catch (error) {
+      console.error("🔍 Debug - Error fetching all posts:", error)
+      setPostsError("Failed to load posts")
+      setDebugInfo({
+        method: "getAllPosts",
+        error: error.message,
+        fullError: error,
+      })
+      handleApiError(error)
+    } finally {
+      setIsLoadingPosts(false)
+    }
+  }
+
+  // Function to handle post likes
+  const handleLikePost = async (postId) => {
+    try {
+      const response = await postAPI.likePost(postId)
+      if (response.success) {
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post._id === postId
+              ? {
+                  ...post,
+                  likes: response.liked ? [...post.likes, user._id] : post.likes.filter((id) => id !== user._id),
+                }
+              : post,
+          ),
+        )
+      }
+    } catch (error) {
+      console.error("Error liking post:", error)
+      handleApiError(error)
+    }
+  }
+
+  // Function to format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffInHours = Math.floor((now - date) / (1000 * 60 * 60))
+
+    if (diffInHours < 1) return "Just now"
+    if (diffInHours < 24) return `${diffInHours} hours ago`
+    if (diffInHours < 48) return "1 day ago"
+    return `${Math.floor(diffInHours / 24)} days ago`
+  }
 
   return (
     <div className="flex flex-col lg:flex-row w-screen min-h-screen bg-gray-50">
-      {/* Mobile Menu Button */}
-      <button
-        className="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-md"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-      >
-        {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
-      </button>
+     
 
       {/* Sidebar - Hidden on mobile unless menu is open */}
-        <SideNavBar />
-      
+      <SideNavBar />
 
-      {/* Overlay for mobile menu */}
-      {isMobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      
 
       {/* Main Content */}
       <div className="flex-1 p-4 lg:p-6 pt-16 lg:pt-6">
         <div className="max-w-6xl mx-auto">
+        
           {/* Header Section */}
           <div className="relative h-32 sm:h-40 lg:h-48 w-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg mb-16 sm:mb-20">
             <img
@@ -166,35 +274,156 @@ function Dashboard() {
 
               {activeTab === "Posts" && (
                 <div className="space-y-6">
-                  {posts.map((post) => (
-                    <div key={post.id} className="bg-white rounded-lg p-4 lg:p-6 shadow-sm">
-                      <div className="flex items-center gap-3 mb-4">
-                        <img src={dummy || "/placeholder.svg"} className="w-10 h-10 rounded-full" alt="Author" />
-                        <div>
-                          <h4 className="font-semibold text-gray-800">{post.author}</h4>
-                          <p className="text-sm text-gray-600">2 hours ago</p>
-                        </div>
-                      </div>
-                      <p className="text-gray-800 mb-4">{post.content}</p>
-                      {post.image && (
-                        <img
-                          src={post.image || "/placeholder.svg"}
-                          className="w-full h-48 sm:h-64 object-cover rounded-lg mb-4"
-                          alt="Post"
-                        />
-                      )}
-                      <div className="flex items-center gap-6 text-gray-600">
-                        <button className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                          <FaThumbsUp className="text-sm" />
-                          <span className="text-sm sm:text-base">{post.likes}</span>
+                  {/* Manual Refresh Button */}
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <div className="flex gap-4">
+                      <button
+                        onClick={fetchUserPosts}
+                        disabled={isLoadingPosts}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                      >
+                        {isLoadingPosts ? "Loading..." : "Refresh My Posts"}
+                      </button>
+                      <button
+                        onClick={fetchAllPosts}
+                        disabled={isLoadingPosts}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                      >
+                        {isLoadingPosts ? "Loading..." : "Load All Posts"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {isLoadingPosts ? (
+                    <div className="bg-white rounded-lg p-8 shadow-sm text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading posts...</p>
+                    </div>
+                  ) : postsError ? (
+                    <div className="bg-white rounded-lg p-8 shadow-sm text-center">
+                      <p className="text-red-600 mb-4">{postsError}</p>
+                      <div className="space-y-2">
+                        <button
+                          onClick={fetchUserPosts}
+                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mr-2"
+                        >
+                          Try User Posts Again
                         </button>
-                        <button className="flex items-center gap-2 hover:text-blue-600 transition-colors">
-                          <FaComment className="text-sm" />
-                          <span className="text-sm sm:text-base">{post.comments}</span>
+                        <button
+                          onClick={fetchAllPosts}
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          Try All Posts
                         </button>
                       </div>
                     </div>
-                  ))}
+                  ) : posts.length === 0 ? (
+                    <div className="bg-white rounded-lg p-8 shadow-sm text-center">
+                      <p className="text-gray-600 mb-4">No posts found</p>
+                      <p className="text-sm text-gray-500 mb-4">
+                        {debugInfo.method === "getUserPosts"
+                          ? "You haven't created any posts yet, or there might be an issue with user matching."
+                          : "No posts exist in the database, or there might be a connection issue."}
+                      </p>
+                      <button
+                        onClick={fetchAllPosts}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Try Loading All Posts
+                      </button>
+                    </div>
+                  ) : (
+                    posts.map((post) => (
+                      <div key={post._id} className="bg-white rounded-lg p-4 lg:p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-4">
+                          <img
+                            src={post.author?.avatar || dummy || "/placeholder.svg"}
+                            className="w-10 h-10 rounded-full"
+                            alt="Author"
+                          />
+                          <div>
+                            <h4 className="font-semibold text-gray-800">{post.author?.name || "Unknown User"}</h4>
+                            <p className="text-sm text-gray-600">{formatDate(post.createdAt)}</p>
+                          </div>
+                        </div>
+
+                        <p className="text-gray-800 mb-4">{post.content}</p>
+                          <div className="mb-4">
+                            <img
+                                  //src={post.images[0].url || dummy}
+                                  src={dummy}
+                                  className="w-full h-48 sm:h-64 object-cover rounded-lg"
+                                  alt="Post image"
+                                />
+                          </div>
+                        {/* Display post images */}
+                        {post.images && post.images.length > 0 && (
+                          <div className="mb-4">
+                            <img
+                                  //src={post.images[0].url || dummy}
+                                  src={dummy}
+                                  className="w-full h-48 sm:h-64 object-cover rounded-lg"
+                                  alt="Post image"
+                                />
+                            {post.images.length === 1 ? (
+                              <img
+                                //src={post.images[0].url || dummy}
+                                src={dummy}
+                                className="w-full h-48 sm:h-64 object-cover rounded-lg"
+                                alt="Post image"
+                              />
+                            ) : (
+                              <div className="grid grid-cols-2 gap-2">
+                                {post.images.slice(0, 4).map((image, index) => (
+                                  <div key={index} className="relative">
+                                    <img
+                                      src={image.url || dummy}
+                                      className="w-full h-32 object-cover rounded-lg"
+                                      alt={`Post image ${index + 1}`}
+                                    />
+                                    {index === 3 && post.images.length > 4 && (
+                                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-semibold">+{post.images.length - 4}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Display tags */}
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="mb-4 flex flex-wrap gap-2">
+                            {post.tags.map((tag, index) => (
+                              <span key={index} className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-6 text-gray-600">
+                          <button
+                            onClick={() => handleLikePost(post._id)}
+                            className={`flex items-center gap-2 hover:text-blue-600 transition-colors ${
+                              post.likes?.includes(user._id) ? "text-blue-600" : ""
+                            }`}
+                          >
+                            <FaThumbsUp className="text-sm" />
+                            <span className="text-sm sm:text-base">{post.likes?.length || 0}</span>
+                          </button>
+                          <button className="flex items-center gap-2 hover:text-blue-600 transition-colors">
+                            <FaComment className="text-sm" />
+                            <span className="text-sm sm:text-base">{post.comments?.length || 0}</span>
+                          </button>
+                        </div>
+
+                       
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
 

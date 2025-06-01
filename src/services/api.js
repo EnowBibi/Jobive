@@ -7,15 +7,20 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Important for cookies
 })
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(
   (config) => {
+    // Try to get token from localStorage first
     const token = localStorage.getItem("token")
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
+    // If no token in localStorage, the cookie will be sent automatically due to withCredentials: true
     return config
   },
   (error) => {
@@ -31,13 +36,83 @@ api.interceptors.response.use(
       // Handle unauthorized access
       localStorage.removeItem("token")
       localStorage.removeItem("user")
-      window.location.href = "/login"
+
+      // Only redirect if we're not already on the login page
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login"
+      }
     }
     return Promise.reject(error)
   },
 )
 
-// Post API functions
+// Auth API functions
+export const authAPI = {
+  // Login function
+  login: async (credentials) => {
+    const response = await api.post("/api/auth/login", credentials, {
+      withCredentials: true, // important to send/receive cookies
+    })
+
+    // Store token and user data
+    if (response.data.success && response.data.token) {
+      localStorage.setItem("token", response.data.token)
+      localStorage.setItem("user", JSON.stringify(response.data.data))
+    }
+
+    return response.data
+  },
+
+  // Register function
+  register: async (userData) => {
+    const response = await api.post("/api/auth/signup", userData, {
+      withCredentials: true, // important to send/receive cookies
+    })
+
+    // Store token and user data if registration includes auto-login
+    if (response.data.success && response.data.token) {
+      localStorage.setItem("token", response.data.token)
+      localStorage.setItem("user", JSON.stringify(response.data.data))
+    }
+
+    return response.data
+  },
+
+  // Logout function
+  logout: async () => {
+    try {
+      await api.post("/api/auth/logout")
+    } catch (error) {
+      console.error("Logout error:", error)
+    } finally {
+      // Clear local storage regardless of API call success
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      window.location.href = "/login"
+    }
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    const response = await api.get("/api/auth/me")
+    return response.data
+  },
+
+  // Check if user is authenticated
+  isAuthenticated: () => {
+    const token = localStorage.getItem("token")
+    const user = localStorage.getItem("user")
+    return !!(token && user)
+  },
+
+  // Get stored user data
+  getStoredUser: () => {
+    const user = localStorage.getItem("user")
+    return user ? JSON.parse(user) : null
+  },
+}
+
+// Post API functions (unchanged)
 export const postAPI = {
   // Create a new post
   createPost: async (postData) => {
@@ -130,7 +205,7 @@ export const postAPI = {
   },
 }
 
-// Training API functions
+// Training API functions (unchanged)
 export const trainingAPI = {
   // Create a new training program
   createTraining: async (trainingData) => {
