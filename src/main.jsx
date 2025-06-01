@@ -16,7 +16,7 @@ import Earnings from "./routes/Earnings";
 import Jobs from "./routes/Jobs";
 import MoreJobs from "./routes/MoreJobs";
 import Freelancers from "./routes/Freelancers";
-import JobCreation from "./routes/jobCreation";
+import JobCreation from "./routes/JobCreation";
 
 const router = createBrowserRouter([
   {
