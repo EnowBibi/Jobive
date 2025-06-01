@@ -32,6 +32,9 @@ function Login() {
 
       if (result.success) {
         localStorage.setItem("user", JSON.stringify(result.data))
+        if (result.data.token) {
+              localStorage.setItem("token", result.data.token);
+            }
         setMessage({ text: "Login successful!", type: "success" })
         navigate("/dashboard")
       } else {

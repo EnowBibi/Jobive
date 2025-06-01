@@ -16,6 +16,7 @@ import Earnings from "./routes/Earnings";
 import Jobs from "./routes/Jobs";
 import MoreJobs from "./routes/MoreJobs";
 import Freelancers from "./routes/Freelancers";
+import JobCreation from "./routes/jobCreation";
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
   {
     path: "/signupemployer",
     element: <SignUpEmployer/>,
+  },
+  {
+    path: "/jobcreation",
+    element: <JobCreation/>,
   },
   {
     path: "/login",

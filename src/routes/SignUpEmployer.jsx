@@ -56,9 +56,11 @@ function SignUpEmployer() {
     if (result.success) {
       // ✅ Save user to localStorage
               localStorage.setItem("user", JSON.stringify(result.data))
-
+            if (result.data.token) {
+              localStorage.setItem("token", result.data.token);
+            }
       setMessage({ text: "Signup successful!", type: "success" })
-      navigate("/dashboard")
+      navigate("/jobcreation")
 
       setFormData({
         firstName: "",
